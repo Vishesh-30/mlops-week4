@@ -86,12 +86,16 @@ jobs:
             *.json
             *.csv
 
-      - name: Setup CML
-        uses: iterative/setup-cml@v2
+      - name: Setup Node.js (for CML)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install CML CLI
+        run: npm install -g @dvcorg/cml
 
       - name: Comment test results with CML
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          source .venv/bin/activate
-          cml comment --file report.md
+        run: cml comment create report.md
+
