@@ -1,24 +1,20 @@
 name: Model Sanity Check
 
 on:
-    pull_request:
-          branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions:
-  pull-requests: write    # Needed for CML to comment on the PR
-  contents: read          # Needed for actions/checkout
-
+  pull-requests: write
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
-
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -31,8 +27,7 @@ jobs:
           source .venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install black flake8 pytest
-
+          pip install black flake8 pytest mlflow
 
       - name: Auto-format with Black
         run: |
@@ -42,7 +37,6 @@ jobs:
           black --check --diff src/ tests/ >> report.md 2>&1 || echo "Formatting issues found" >> report.md
           echo "" >> report.md
 
-
       - name: Lint with Flake8
         run: |
           source .venv/bin/activate
@@ -50,12 +44,13 @@ jobs:
           flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503 >> report.md 2>&1 || echo "Linting issues found" >> report.md
           echo "" >> report.md
 
+      - name: Set MLflow Tracking URI
+        run: echo "MLFLOW_TRACKING_URI=http://34.44.100.201:5000" >> $GITHUB_ENV
 
       - name: Run training
         run: |
           source .venv/bin/activate
-          python src/train.py
-
+          python src/train.py iris_poisoned.csv
 
       - name: Generate model performance metrics
         run: |
@@ -65,7 +60,6 @@ jobs:
           echo "![Model Metrics](metrics.png)" >> report.md
           echo "" >> report.md
 
-
       - name: Run tests and save report
         run: |
           source .venv/bin/activate
@@ -74,17 +68,16 @@ jobs:
           echo "" >> report.md
           echo "Tests completed on $(date)" >> report.md
 
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: model-artifacts
           path: |
-            model.pkl
+            model.joblib
+            label_encoder.joblib
+            test_data.joblib
             metrics.png
             report.md
-            *.json
-            *.csv
 
       - name: Setup Node.js (for CML)
         uses: actions/setup-node@v3
