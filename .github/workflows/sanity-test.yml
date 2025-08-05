@@ -45,7 +45,7 @@ jobs:
           echo "" >> report.md
 
       - name: Set MLflow Tracking URI
-        run: echo "MLFLOW_TRACKING_URI=http://<EXTERNAL_IP>:5000" >> $GITHUB_ENV
+        run: echo "MLFLOW_TRACKING_URI=http://34.44.100.201:5000" >> $GITHUB_ENV
 
       - name: Run training
         run: |

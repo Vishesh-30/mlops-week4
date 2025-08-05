@@ -9,7 +9,7 @@ import mlflow
 import mlflow.sklearn
 
 # Set MLflow tracking URI to local MLflow server
-mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_tracking_uri("http://34.44.100.201:5000")
 
 
 def train(data_path):
